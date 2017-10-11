@@ -2,7 +2,8 @@ var gulp = require("gulp");
 
 var ts = require("gulp-typescript");
 var tsProject = ts.createProject("tsconfig.json");
-var tsProjectTeste = ts.createProject("testes/tsconfig.json");
+var tsProjectTestesUnitarios = ts.createProject("testes/tsconfig.json");
+var tsProjectTestesPontaAPonta = ts.createProject("testes-ponta-a-ponta/tsconfig.json");
 var alsatian=  require("alsatian");
 var TestSet = alsatian.TestSet;
 var  TestRunner = alsatian.TestRunner;
@@ -25,7 +26,8 @@ var tslint = require("tslint");
 var paths = {
     pages: ['src/*.html'],
     styles: ['src/*.css'],
-    testes: ['./saida/**/*.spec.js'],
+    testesUnitarios: ['./saida/**/*.spec.js'],
+    testesPontaAPonta: ['./saida/testes-ponta-a-ponta/**/*.spec.js'],
     tsFiles: ['./src/**/*.ts'],
     saidaTestes:"./saida",
     saida:"./saida",
@@ -45,25 +47,28 @@ gulp.task("tslint", () =>{
     .pipe(gulpTslint.report())
 });
 
-gulp.task("compilar-teste", function () {
-    del([
-        paths.saida+'/**/*'
-    ]);
+gulp.task("compilar-testes-unitarios", ["clean-saida"], function () {
     return compilar()
         .js.pipe(gulp.dest(paths.saidaTestes+"/src/"))
-        .pipe(tsProjectTeste.src())
-        .pipe(tsProjectTeste())
+        .pipe(tsProjectTestesUnitarios.src())
+        .pipe(tsProjectTestesUnitarios())
+        .js.pipe(gulp.dest(paths.saidaTestes));
+});
+
+gulp.task("compilar-testes-ponta-a-ponta", ["clean-saida"], function () {
+    return tsProjectTestesPontaAPonta.src()
+        .pipe(tsProjectTestesPontaAPonta())
         .js.pipe(gulp.dest(paths.saidaTestes));
 });
 
 
-gulp.task("testar", ["compilar-teste", "tslint"], (done) => {
+gulp.task("testar-unitarios", ["compilar-testes-unitarios", "tslint"], (done) => {
 
     // create test set
     const testSet = TestSet.create();
 
     // add your tests
-    testSet.addTestsFromFiles(paths.testes);
+    testSet.addTestsFromFiles(paths.testesUnitarios);
 
     // create a test runner
     const testRunner = new TestRunner();
@@ -81,6 +86,33 @@ gulp.task("testar", ["compilar-teste", "tslint"], (done) => {
               // and tell gulp when we're done
               .then(() => done());
 });
+
+gulp.task("testar-ponta-a-ponta", ["compilar-testes-ponta-a-ponta", "debug", "tslint"], (done) => {
+
+    // create test set
+    const testSet = TestSet.create();
+
+    // add your tests
+    testSet.addTestsFromFiles(paths.testesPontaAPonta);
+
+    // create a test runner
+    const testRunner = new TestRunner();
+
+    // setup the output
+    testRunner.outputStream
+              // this will use alsatian's default output if you remove this
+              // you'll get TAP or you can add your favourite TAP reporter in it's place
+              .pipe(TapBark.create().getPipeable()) 
+              // pipe to the console
+              .pipe(process.stdout);
+
+    // run the test set
+    testRunner.run(testSet)
+              // and tell gulp when we're done
+              .then(() => done());
+});
+
+gulp.task("testar", ["testar-unitarios", "testar-ponta-a-ponta"]);
 
 
 

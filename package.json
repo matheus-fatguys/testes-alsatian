@@ -1,6 +1,6 @@
 {
   "name":"type-script-alsatian",
-  "description":"exemplo de teste automatizado com alsatian, aproveitando pra usar o debigger do chrome e o tslint associados ao gulp e o servidor browsersync",
+  "description":"exemplo de teste automatizado com alsatian, aproveitando pra usar o debugger do chrome e o tslint associados ao gulp e o servidor browsersync com testes de ponta a ponta com selenium",
   "version":"0.0.1",
   "homepage":"https://github.com/matheus-fatguys/testes-alsatian",
   "bugs":"https://github.com/matheus-fatguys/testes-alsatian/issues",

@@ -33,7 +33,6 @@ function dividirEntradas() {
     try {
         setValorDeResultado(Calculadora.dividir(getValorDeA(), getValorDeB()));
     } catch (error) {
-        console.error(error);
         alert(error);
     }
 }
